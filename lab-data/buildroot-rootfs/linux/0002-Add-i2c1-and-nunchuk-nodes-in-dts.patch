@@ -1,0 +1,57 @@
+From 55278c2906191461e34b6851c41ac5ac023d3024 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart@bootlin.com>
+Date: Mon, 7 Apr 2014 11:55:56 +0200
+Subject: [PATCH 2/2] Add i2c1 and nunchuk nodes in dts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Antoine Ténart <antoine.tenart@bootlin.com>
+Signed-off-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+---
+ arch/arm/boot/dts/am335x-bone-common.dtsi      |  7 +++++++
+ arch/arm/boot/dts/am335x-boneblack-common.dtsi | 13 +++++++++++++
+ 2 files changed, 20 insertions(+)
+
+diff --git a/arch/arm/boot/dts/am335x-bone-common.dtsi b/arch/arm/boot/dts/am335x-bone-common.dtsi
+index 0ccdc7cd463b..c5ce2c6748ba 100644
+--- a/arch/arm/boot/dts/am335x-bone-common.dtsi
++++ b/arch/arm/boot/dts/am335x-bone-common.dtsi
+@@ -89,6 +89,13 @@ AM33XX_PADCONF(AM335X_PIN_UART1_RTSN, PIN_INPUT_PULLUP, MUX_MODE3)	/* uart1_rtsn
+ 		>;
+ 	};
+ 
++	i2c1_pins: pinmux_i2c1_pins {
++		pinctrl-single,pins = <
++			AM33XX_PADCONF(AM335X_PIN_SPI0_D1, PIN_INPUT_PULLUP, MUX_MODE2)		/* spi0_d1.i2c1_sda */
++			AM33XX_PADCONF(AM335X_PIN_SPI0_CS0, PIN_INPUT_PULLUP, MUX_MODE2)	/* spi0_cs0.i2c1_scl */
++		>;
++	};
++
+ 	uart0_pins: pinmux_uart0_pins {
+ 		pinctrl-single,pins = <
+ 			AM33XX_PADCONF(AM335X_PIN_UART0_RXD, PIN_INPUT_PULLUP, MUX_MODE0)
+diff --git a/arch/arm/boot/dts/am335x-boneblack-common.dtsi b/arch/arm/boot/dts/am335x-boneblack-common.dtsi
+index 10494c4431b9..5d26fc404490 100644
+--- a/arch/arm/boot/dts/am335x-boneblack-common.dtsi
++++ b/arch/arm/boot/dts/am335x-boneblack-common.dtsi
+@@ -32,3 +32,16 @@ memory@80000000 {
+ 		reg = <0x80000000 0x20000000>; /* 512 MB */
+ 	};
+ };
++
++&i2c1 {
++	status = "okay";
++	clock-frequency = <100000>;
++
++	pinctrl-0 = <&i2c1_pins>;
++	pinctrl-names = "default";
++
++	nunchuk: nunchuk@52 {
++		compatible = "nintendo,wiimote-extension";
++		reg = <0x52>;
++	 };
++};
+-- 
+2.35.1
+
