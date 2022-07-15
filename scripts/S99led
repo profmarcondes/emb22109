@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+#
+
+PIN=24
+
+start() {
+	printf "Turning INIT led on: " 
+	echo $PIN > /sys/class/gpio/export
+	echo "out" > /sys/class/gpio/gpio$PIN/direction
+	echo 1 > /sys/class/gpio/gpio$PIN/value
+	printf "OK\n"
+}
+
+stop() {
+	printf "Turning INIT led off: "
+	echo $PIN > /sys/class/gpio/unexport
+	printf "OK\n" 
+}
+
+restart() {
+	stop
+	start
+}
+
+case "$1" in
+  start)
+  	start
+	;;
+  stop)
+  	stop
+	;;
+  restart|reload)
+  	restart
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit $?
