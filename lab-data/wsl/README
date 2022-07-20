@@ -5,9 +5,13 @@ https://docs.microsoft.com/pt-br/windows/wsl/connect-usb
 
 -> Compilar o kernel do wsl com suporte para usb-storage
 https://microhobby.com.br/blog/2019/09/21/compiling-your-own-linux-kernel-for-windows-wsl2/
+   - sudo apt install git bc build-essential flex bison libssl-dev libelf-dev
+   - git clone https://github.com/microsoft/WSL2-Linux-Kernel.git
   - interessante support usb-serial / prolific usbserial
   - Config -> config-usb_storage (copiar para /WSL2-Linux-Kernel/Microsoft/)
-  - Compilar o kernel e copiar o vmlinux para o seu home, junto com o 
+  - Compilar o kernel 
+     - make KCONFIG_CONFIG=Microsoft/config-usb_storage -j8
+  - Copiar o vmlinux para o seu home(Windows), junto com o 
     .wslconfig (atualizar path no arquivo)
 
 ## Para conectar o dispositivo usb
