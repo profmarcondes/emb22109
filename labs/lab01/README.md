@@ -28,7 +28,7 @@ sudo apt install sed make binutils gcc g++ bash patch gzip bzip2 perl tar cpio p
 Clonar o repositório com o comando
 
 ```
-git clone --recurse-submodules https://github.com/profmarcondes/lxe22109.git
+git clone --recurse-submodules https://github.com/profmarcondes/emb22109.git
 ```
 
 O último comando irá fazer o clone deste repositório, que contém além destes laboratórios, outras pastas que serão utilizadas em laboratórios futuros, além do próprio repositório do Buildroot já configurado para a versão que iremos utilizar durante o curso.
