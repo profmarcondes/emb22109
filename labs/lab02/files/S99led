@@ -1,0 +1,44 @@
+#!/bin/sh
+#
+#
+GPIO_PINS="21 22 23 24"
+
+start() {
+	printf "Initializing GPIO leds: "
+        for LED in $GPIO_PINS; do	
+	  echo ${LED} > /sys/class/gpio/export
+	  echo "out" > /sys/class/gpio/gpio${LED}/direction
+	done
+	echo 1 > /sys/class/gpio/gpio${LED}/value
+	printf "OK\n"
+}
+
+stop() {
+	printf "Unexporting GPIO leds: "
+	for LED in $GPIO_PINS; do
+	  echo ${LED} > /sys/class/gpio/unexport
+	done
+	printf "OK\n" 
+}
+
+restart() {
+	stop
+	start
+}
+
+case "$1" in
+  start)
+  	start
+	;;
+  stop)
+  	stop
+	;;
+  restart|reload)
+  	restart
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit $?
