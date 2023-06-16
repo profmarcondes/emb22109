@@ -292,7 +292,7 @@ evtest /dev/input/event0
 ```
 ## Gerar um defconfig
 
-Agora que nosso sistema já está mais avançado, vamos garantir que sua configuração esteja devidamente salva e não possa ser perdida. Vá em menuconfig e no menu de opções de construção (build). Existe uma opção chamada `Localização para salvar a configuração do buildroot` que indica onde o Buildroot salvará o arquivo defconfig gerado pelo make saveefconfig. Ajuste este valor para $(TOPDIR)/configs/lxe22109_defconfig.
+Agora que nosso sistema já está mais avançado, vamos garantir que sua configuração esteja devidamente salva e não possa ser perdida. Vá em menuconfig e no menu de opções de construção (build). Existe uma opção chamada `Localização para salvar a configuração do buildroot` que indica onde o Buildroot salvará o arquivo defconfig gerado pelo make saveefconfig. Ajuste este valor para $(TOPDIR)/configs/emb22109_defconfig.
 
 Em seguida, saia do menuconfig e execute:
 
@@ -300,7 +300,7 @@ Em seguida, saia do menuconfig e execute:
 make savedefconfig
 ```
 
-Leia o arquivo configs/lxe22109_defconfig gerado nas fontes Buildroot. Você verá os valores de todas as opções para as quais selecionamos um valor diferente do padrão. Portanto, é um resumo muito bom do que é o nosso sistema.
+Leia o arquivo configs/emb22109_defconfig gerado nas fontes Buildroot. Você verá os valores de todas as opções para as quais selecionamos um valor diferente do padrão. Portanto, é um resumo muito bom do que é o nosso sistema.
 
 Identifique as opções relacionadas aos seguintes aspectos do sistema:
 
@@ -318,21 +318,21 @@ Para garantir que possamos reconstruir nosso sistema completamente, começaremos
 Para fazer isso, crie um diretório de compilação em qualquer lugar que desejar e mova-se para dentro deste diretório:
 
 ```
-mkdir ~/lxe22109/buildroot-build/
-cd ~/lxe22109/buildroot-build/
+mkdir ~/emb22109/buildroot-build/
+cd ~/emb22109/buildroot-build/
 ```
 
-Agora, vamos carregar o lxe22109_defconfig:
+Agora, vamos carregar o emb22109_defconfig:
 
 ```
-make -C ~/lxe22109/buildroot/ O=$(pwd) lxe22109_defconfig
+make -C ~/emb22109/buildroot/ O=$(pwd) emb22109_defconfig
 ```
 
-Vamos explicar um pouco o que acontece aqui. Usando -C ~/lxe22109/buildroot/, na verdade, informamos ao make que o Makefile a ser analisado não está no diretório atual, mas no diretório passado como argumento -C. Ao passar O=, dizemos ao Buildroot onde toda a saída deve ir: por padrão, ele vai em output/ dentro das fontes do Buildroot, mas aqui substituímos isso pelo diretório atual ($(pwd)).
+Vamos explicar um pouco o que acontece aqui. Usando -C ~/emb22109/buildroot/, na verdade, informamos ao make que o Makefile a ser analisado não está no diretório atual, mas no diretório passado como argumento -C. Ao passar O=, dizemos ao Buildroot onde toda a saída deve ir: por padrão, ele vai em output/ dentro das fontes do Buildroot, mas aqui substituímos isso pelo diretório atual ($(pwd)).
 
 Este comando terá dois efeitos principais:
 
-   1. Ele carregará o lxe22109_defconfig como a configuração atual. Depois de executar o comando, leia o arquivo chamado .config. É muito mais longo que o defconfig, porque contém os valores para todas as opções.
+   1. Ele carregará o emb22109_defconfig como a configuração atual. Depois de executar o comando, leia o arquivo chamado .config. É muito mais longo que o defconfig, porque contém os valores para todas as opções.
   
    2. Ele criará um Makefile mínimo neste diretório de saída, o que nos permitirá evitar fazer make -C ... O=...  todas as vezes que formos executar um alvo make no diretório.
 
