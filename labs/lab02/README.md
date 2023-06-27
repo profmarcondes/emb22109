@@ -318,8 +318,8 @@ Para garantir que possamos reconstruir nosso sistema completamente, começaremos
 Para fazer isso, crie um diretório de compilação em qualquer lugar que desejar e mova-se para dentro deste diretório:
 
 ```
-mkdir ~/emb22109/buildroot-build/
-cd ~/emb22109/buildroot-build/
+mkdir ~/emb22109/lab02-build/
+cd ~/emb22109/lab02-build/
 ```
 
 Agora, vamos carregar o emb22109_defconfig:
