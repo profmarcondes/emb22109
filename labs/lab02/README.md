@@ -292,7 +292,7 @@ evtest /dev/input/event0
 ```
 ## Gerar um defconfig
 
-Agora que nosso sistema já está mais avançado, vamos garantir que sua configuração esteja devidamente salva e não possa ser perdida. Vá em menuconfig e no menu de opções de construção (build). Existe uma opção chamada `Localização para salvar a configuração do buildroot` que indica onde o Buildroot salvará o arquivo defconfig gerado pelo make saveefconfig. Ajuste este valor para $(TOPDIR)/configs/emb22109_defconfig.
+Agora que nosso sistema já está mais avançado, vamos garantir que sua configuração esteja devidamente salva e não possa ser perdida. Vá em menuconfig e no menu de opções de construção (build). Existe uma opção chamada `Localização para salvar a configuração do buildroot` que indica onde o Buildroot salvará o arquivo defconfig gerado pelo make savedefconfig. Ajuste este valor para $(TOPDIR)/configs/emb22109_defconfig.
 
 Em seguida, saia do menuconfig e execute:
 
