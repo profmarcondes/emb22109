@@ -3,6 +3,8 @@
 USR=aluno
 VDIR=/var/data/${USR}
 IMAGE=hmarcondes/dev_space:latest
+REPO=${VDIR}/emb22109/emb22109
+export REPO
 
 function pod_start () {
 	podman run -it --rm --security-opt label=disable \
