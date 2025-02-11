@@ -164,7 +164,7 @@ Para formatar seu cartão SD, siga os seguintes passos:
 2. Apague o início do cartão SD para garantir que as partições existentes não sejam detectadas por engano:
 
    ```
-   sudo dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=16.
+   sudo dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=16
    ```
    
    Use sdc ou sdb em vez de mmcblk0, se necessário.
@@ -185,7 +185,7 @@ Para formatar seu cartão SD, siga os seguintes passos:
 4. Formate a primeira partição como um sistema de arquivos FAT32:
 
    ```
-   sudo mkfs.vfat -F 32 -n boot /dev/mmcblk0p1.
+   sudo mkfs.vfat -F 32 -n boot /dev/mmcblk0p1
    ```
 
    Use sdc1 ou sdb1 em vez de mmcblk0p1, se necessário.
@@ -193,7 +193,7 @@ Para formatar seu cartão SD, siga os seguintes passos:
 5. Formate a segunda partição como um sistema de arquivos ext4:
 
    ```
-   sudo mkfs.ext4 -L rootfs -E nodiscard /dev/mmcblk0p2.
+   sudo mkfs.ext4 -L rootfs -E nodiscard /dev/mmcblk0p2
    ```
    
    Use sdc2 ou sdb2 em vez de mmcblk0p2, se necessário.
@@ -214,6 +214,10 @@ Depois que o Buildroot terminar de construir o sistema, é hora de colocá-lo no
     cp output/images/{MLO,u-boot.img,zImage,am335x-boneblack.dtb} /media/$USER/boot/
     ```
   - Extraia o arquivo rootfs.tar para a partição rootfs do cartão SD, usando:
+
+    - Caso esteja utilizando as máquinas do laboratório, utilize o comando `update_rootfs` dentro da pasta `output/images`
+    
+    - Caso esteja utilizando um computador próprio, utilize o comando abaixo:
     ```
     sudo tar -C /media/$USER/rootfs/ -xf output/images/rootfs.tar
     ```
