@@ -1,9 +1,9 @@
 #!/bin/sh
 
 USR=aluno
-VDIR=/var/data/${USR}
+VDIR=/var/data/${USR}/emb22109
 IMAGE=hmarcondes/dev_space:latest
-REPO=${VDIR}/emb22109/emb22109
+REPO=${VDIR}/repo
 export REPO
 
 function pod_start () {
@@ -15,6 +15,10 @@ function pod_start () {
 
 function setImage () {
 	IMAGE=$1
+}
+
+function installHome() {
+	cp ${REPO}/scripts/.* ${VDIR}
 }
 
 function update_rootfs () {
