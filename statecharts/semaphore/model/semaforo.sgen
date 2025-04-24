@@ -1,0 +1,17 @@
+GeneratorModel for create::cpp {
+
+	const PROJECT : string = "Semaforo"
+	const FOLDER : string = "src-gen"
+
+	statechart semaforo {
+
+		feature Outlet {
+			targetProject = PROJECT
+			targetFolder = FOLDER
+		}
+		
+		feature GeneralFeatures {
+			timerService = true
+		}
+	}
+}
