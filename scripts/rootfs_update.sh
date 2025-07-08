@@ -1,11 +1,5 @@
 #!/bin/sh
 
-#USR=aluno
-#VDIR=/var/data/${USR}/emb22109
-#IMAGE=hmarcondes/dev_space:latest
-#REPO=${VDIR}/repo
-#export REPO
-
 HOSTSPAWN="flatpak-spawn --directory=/tmp --host "
 
 if [ -e rootfs.tar ]; then
@@ -20,7 +14,6 @@ else
 fi
 
 #LABEL=$(blkid -o value -s LABEL $DEV)
-
 DEV=$(blkid -o device --label rootfs)
 if [ $? == 0 ]; then
 	echo "Found rootfs on -> $DEV"
@@ -36,6 +29,9 @@ if [ $? == 0 ]; then
 	
 	if [ ! -d .tmp ]; then
 		mkdir .tmp 
+	else
+		echo "Something nasty happened, please remove .tmp directory and try again!"
+		exit 1
 	fi
 	
 	fuse2fs -o fakeroot $DEV .tmp
