@@ -12,5 +12,5 @@ RUN dnf --assumeyes install autoconf automake make e2fsprogs gcc g++ ncurses-dev
 RUN dnf clean all
 RUN ln -s /run/host/var/data/aluno /data
 RUN ln -s /run/host/var/data/aluno/emb22109 /emb22109
-COPY ../rootfs_update.sh /usr/local/bin/
+COPY ./rootfs_update.sh /usr/local/bin/
 RUN chmod a+x /usr/local/bin/rootfs_update.sh
