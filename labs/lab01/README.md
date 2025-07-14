@@ -11,7 +11,6 @@ VirtualBox ou VMWare. Também é possível utilizar o Windows Subsystem for Linu
 nesta [página](wsl/README.md).
 
 
-
 ## Passos Iniciais
 
 A primeira etapa é clonar este repositório para o computador que irá utilizar
@@ -29,7 +28,8 @@ Este repositório, contém além dos laboratórios, outras pastas que serão
 utilizadas em laboratórios futuros, além do próprio repositório do Buildroot já
 configurado para a versão que iremos utilizar durante o curso.
 
-Agora iremos realizar o setup do contaneir para desenvolvermos as atividades, para isso, basta executar o comando abaixo:
+Agora iremos realizar o setup do container para desenvolvermos as atividades,
+para isso, basta executar o comando abaixo:
 
 ```
 cd /var/data/aluno/emb22109/scripts/
@@ -191,7 +191,9 @@ Nosso cartão SD precisa ser dividido em duas partições:
     uma partição FAT32. Vamos armazenar o bootloader (MLO e u-boot.img), a
     imagem do kernel (zImage) e o arquivo DeviceTree (am335x-boneblack.dtb).
 
-  - Uma segunda partição para o sistema de arquivos raiz. Ele pode usar qualquer tipo de sistema de arquivos que você quiser, mas para o nosso sistema, usaremos o ext4.
+  - Uma segunda partição para o sistema de arquivos raiz. Ele pode usar qualquer
+    tipo de sistema de arquivos que você quiser, mas para o nosso sistema,
+    usaremos o ext4.
 
 Primeiro, vamos identificar sob qual nome seu cartão SD é identificado em seu
 sistema: observe a saída de `cat /proc/partitions` e encontre seu cartão SD. Em
