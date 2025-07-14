@@ -10,31 +10,36 @@ VirtualBox ou VMWare. Também é possível utilizar o Windows Subsystem for Linu
 (WSL). Algumas instruções para configuração do WSL no Windows são fornecidas
 nesta [página](wsl/README.md).
 
+
+
 ## Passos Iniciais
 
-Para desenvolver as atividades dos laboratórios nos computadores do DAELN,
-iremos utilizar containers já configurados com todas as dependências e
-ferramentas necessárias no sistema. Para isso, precisamos inicialmente criar o
-Execute o comando abaixo para criar um container toolbox chamado **emb22109**:
-container, a partir da imagem disponibilizada pelo professor no DockerHUB.
+A primeira etapa é clonar este repositório para o computador que irá utilizar
+no laboratório. Nas máquinas do DAELN, existe uma pasta que é persistente para
+o uso das nossas atividades. Esta pasta está no caminho ```/var/data/aluno/```.
+
+Para isso, abra um terminal no Linux e digite os comandos abaixo:
 
 ```
-toolbox create -i docker.io/hmarcondes/emb22109-toolbox:latest emb22109
+cd /var/data/aluno
+git clone --recurse-submodules https://github.com/profmarcondes/emb22109.git
+```
+
+Este repositório, contém além dos laboratórios, outras pastas que serão
+utilizadas em laboratórios futuros, além do próprio repositório do Buildroot já
+configurado para a versão que iremos utilizar durante o curso.
+
+Agora iremos realizar o setup do contaneir para desenvolvermos as atividades, para isso, basta executar o comando abaixo:
+
+```
+cd /var/data/aluno/emb22109/scripts/
+./setup_container.sh
 ```
 
 Este passo só precisa ser realizado uma única vez na máquina, pois a imagem
 ficará armazenada de forma persistente no computador que estiver utilizando.
 
-Caso ocorra um erro indicando que o container já existe, execute os comandos
-abaixo para remover ele e execute novamente o comando de criação para
-garantirmos que está utilizando a versão mais recente de imagem.
-
-```
-podman container stop emb22109
-toolbox rm emb22109
-```
-
-Para entrar no container, basta executar o comando:
+Agora, para entrar no container, basta executar o comando:
 
 ```
 toolbox enter emb22109
@@ -43,23 +48,13 @@ toolbox enter emb22109
 Todo o desenvolvimento dos laboratórios serão executados dentro do ambiente do
 container emb22109, sendo que dentro do mesmo, há uma pasta no caminho
 ```/emb22109/```, que está mapeado no diretório ```/var/data/aluno/emb22109```
-do seu computador, e que é persistente na máquina.
-
-Dentro desta pasta, iremos clonar o repositório da disciplina com o comando:
-
-```
-git clone --recurse-submodules https://github.com/profmarcondes/emb22109.git repo
-```
-
-Este repositório, contém além dos laboratórios, outras pastas que serão
-utilizadas em laboratórios futuros, além do próprio repositório do Buildroot já
-configurado para a versão que iremos utilizar durante o curso.
+do seu computador.
 
 Agora entraremos na pasta buildroot, dentro do repositório para iniciar a
-configuração do mesmo. Utilize o comando abaixo para isto:
+configuração do mesmo. Utilize o comando abaixo (dentro do toolbox) para isto:
 
 ```
-cd repo/buildroot
+cd /emb22109/buildroot
 ```
 
 ## Configurando o Buildroot
@@ -139,8 +134,8 @@ Por hora não iremos modificar a opção padrão (tar the root filesystem)
 
 #### Finalizando a configuração e gerando o Linux Embarcado
 
-Pronto, agora sai de todos os menus da ferramenta Kconfig, não se esquecendo de
-confirmar a gravação das configurações no sistema, respondeno Yes quando
+Pronto, agora saia de todos os menus da ferramenta Kconfig, não se esquecendo de
+confirmar a gravação das configurações no sistema, respondeno ```Yes``` quando
 perguntado.
 
 Você irá voltar a linha de comando, dentro da pasta do Buildroot. Para iniciar a
@@ -176,28 +171,10 @@ deve aparecer: /dev/ttyUSB0.
 
 Você também pode ver este dispositivo aparecer olhando a saída do comando  `dmesg`.
 
-Para se comunicar com a placa através da porta serial, instale um programa de
-comunicação serial, como o picocom:
+Para se comunicar com a placa através da porta serial, iremos utilizar o programa
+picocom. 
 
-```
-sudo apt install picocom
-```
-
-Se você executar ls -l /dev/ttyUSB0, também poderá ver que apenas o root e os
-usuários pertencentes ao grupo dialout têm acesso de leitura e gravação a esse
-arquivo. Portanto, você precisa adicionar seu usuário ao grupo de discagem:
-
-```
-sudo adduser $USER dialout
-```
-
-Importante: para que a mudança de grupo seja efetiva, no Ubuntu 18.04, você deve
-reiniciar completamente o sistema <!--2 Conforme explicado em
-https://askubuntu.com/questions/1045993/after-adding-a-group-logoutlogin-is-notenough-in-18-04/.
--->. Uma solução alternativa é executar newgrp dialout, mas não é global. Você
-tem que executá-lo em cada terminal.
-
-Agora, você pode executar `picocom -b 115200 /dev/ttyUSB0`, para iniciar a
+Você pode executar ```picocom -b 115200 /dev/ttyUSB0```, para iniciar a
 comunicação serial em /dev/ttyUSB0, com uma taxa de transmissão de 115200. Se
 desejar sair do picocom, pressione [Ctrl][a] seguido de [Ctrl][x].
 
@@ -212,12 +189,12 @@ Nosso cartão SD precisa ser dividido em duas partições:
   - Uma primeira partição para o bootloader. Ele precisa atender aos requisitos
     do AM335x SoC para que possa encontrar o bootloader nesta partição. Deve ser
     uma partição FAT32. Vamos armazenar o bootloader (MLO e u-boot.img), a
-    imagem do kernel (zImage) e a Árvore de Dispositivos (am335x-boneblack.dtb).
+    imagem do kernel (zImage) e o arquivo DeviceTree (am335x-boneblack.dtb).
 
   - Uma segunda partição para o sistema de arquivos raiz. Ele pode usar qualquer tipo de sistema de arquivos que você quiser, mas para o nosso sistema, usaremos o ext4.
 
 Primeiro, vamos identificar sob qual nome seu cartão SD é identificado em seu
-sistema: observe a saída de cat /proc/partitions e encontre seu cartão SD. Em
+sistema: observe a saída de `cat /proc/partitions` e encontre seu cartão SD. Em
 geral, se você usar o leitor de cartão SD interno de um laptop, será mmcblk0,
 enquanto se usar um leitor de cartão SD USB externo, será sdX (ou seja, sdb,
 sdc, etc.). **Cuidado: /dev/sda geralmente é o disco rígido da sua máquina!**
@@ -235,16 +212,14 @@ Para formatar seu cartão SD, siga os seguintes passos:
    sejam detectadas por engano:
 
    ```
-   sudo dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=16
+   sudo dd if=/dev/zero of=/dev/sdc bs=1M count=16
    ```
-   
-   Use sdc ou sdb em vez de mmcblk0, se necessário.
 
 3. Crie as duas partições.
     - Inicie a ferramenta cfdisk para isso:
     
       ```
-      sudo cfdisk /dev/mmcblk0
+      sudo cfdisk /dev/sdc
       ```
     
     - Escolha o tipo de tabela de partição DOS
@@ -258,19 +233,15 @@ Para formatar seu cartão SD, siga os seguintes passos:
 4. Formate a primeira partição como um sistema de arquivos FAT32:
 
    ```
-   sudo mkfs.vfat -F 32 -n boot /dev/mmcblk0p1
+   sudo mkfs.vfat -F 32 -n boot /dev/sdc1
    ```
-
-   Use sdc1 ou sdb1 em vez de mmcblk0p1, se necessário.
 
 5. Formate a segunda partição como um sistema de arquivos ext4:
 
    ```
-   sudo mkfs.ext4 -L rootfs -E nodiscard /dev/mmcblk0p2
+   sudo mkfs.ext4 -L rootfs -E nodiscard /dev/sdc2
    ```
-   
-   Use sdc2 ou sdb2 em vez de mmcblk0p2, se necessário.
-  
+
       - -L atribui um nome de volume à partição
       - -E nodiscard desativa o descarte de blocos inválidos. Embora essa seja
         uma opção útil para cartões com blocos defeituosos, pular essa etapa
@@ -295,7 +266,7 @@ cartão SD:
   - Extraia o arquivo rootfs.tar para a partição rootfs do cartão SD, usando:
 
     - Caso esteja utilizando as máquinas do laboratório, utilize o comando
-      `update_rootfs` dentro da pasta `output/images`
+      `rootfs_update.sh` dentro da pasta `output/images`
     
     - Caso esteja utilizando um computador próprio, utilize o comando abaixo:
     ```
@@ -318,8 +289,9 @@ set_mmc1=if test $board_name = A33515BB; then setenv bootpartition mmcblk1p2; fi
 set_bootargs=setenv bootargs console=${console} root=/dev/${bootpartition} rw rootfstype=ext4 rootwait
 uenvcmd=run set_mmc1; run set_bootargs;run loadimage;run loadfdt;printenv bootargs;bootz ${loadaddr} - ${fdtaddr}
 ```
-Estas linhas ensinam o bootloader U-Boot como carregar a imagem do kernel do Linux e o
-Device Tree, antes de inicializar o kernel. <!--Ele usa um mecanismo U-Boot padrão chamado distro boot command, consulte https://source.denx.de/u-boot/u-boot/-/raw/master/doc/README. distro para mais detalhes.-->
+Estas linhas ensinam o bootloader U-Boot como carregar a imagem do kernel do
+Linux e o Device Tree, antes de inicializar o kernel. 
+<!--Ele usa um mecanismo U-Boot padrão chamado distro boot command, consulte https://source.denx.de/u-boot/u-boot/-/raw/master/doc/README. distro para mais detalhes.-->
 
 Desmonte as duas partições do cartão SD e ejete o cartão SD.
 
@@ -338,7 +310,7 @@ Faça login como root no BeagleBone Black e explore o sistema. Execute ps para
 ver quais processos estão em execução e observe o que o Buildroot gerou em /bin,
 /lib, /usr e /etc.
 
-Nota: se o seu sistema não inicializar conforme o esperado, certifique-se de
+**Nota**: se o seu sistema não inicializar conforme o esperado, certifique-se de
 redefinir o ambiente U-Boot executando os seguintes comandos U-Boot:
 
 ```
@@ -346,7 +318,7 @@ env padrão -f -a
 saveenv
 ```
 
-e redefinir. Isso é necessário porque o U-Boot carregado do cartão SD ainda
+Isso é necessário porque o U-Boot carregado do cartão SD ainda
 carrega o ambiente U-Boot do eMMC. Peça esclarecimentos adicionais ao seu
 instrutor, se necessário.
 
