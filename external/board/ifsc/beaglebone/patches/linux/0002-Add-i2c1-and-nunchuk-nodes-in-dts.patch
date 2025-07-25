@@ -1,0 +1,57 @@
+From 557566140c3118c758fac7297b4bf209e9018bf6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart@bootlin.com>
+Date: Mon, 7 Apr 2014 11:55:56 +0200
+Subject: [PATCH 2/2] Add i2c1 and nunchuk nodes in dts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Antoine Ténart <antoine.tenart@bootlin.com>
+Signed-off-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+---
+ arch/arm/boot/dts/ti/omap/am335x-bone-common.dtsi   |  7 +++++++
+ .../boot/dts/ti/omap/am335x-boneblack-common.dtsi   | 13 +++++++++++++
+ 2 files changed, 20 insertions(+)
+
+diff --git a/arch/arm/boot/dts/ti/omap/am335x-bone-common.dtsi b/arch/arm/boot/dts/ti/omap/am335x-bone-common.dtsi
+index 96451c8a815c..5b855be8c481 100644
+--- a/arch/arm/boot/dts/ti/omap/am335x-bone-common.dtsi
++++ b/arch/arm/boot/dts/ti/omap/am335x-bone-common.dtsi
+@@ -82,6 +82,13 @@ AM33XX_PADCONF(AM335X_PIN_I2C0_SCL, PIN_INPUT_PULLUP, MUX_MODE0)	/* i2c0_scl.i2c
+ 		>;
+ 	};
+ 
++	i2c1_pins: pinmux_i2c1_pins {
++		pinctrl-single,pins = <
++			AM33XX_PADCONF(AM335X_PIN_SPI0_D1, PIN_INPUT_PULLUP, MUX_MODE2)		/* spi0_d1.i2c1_sda */
++			AM33XX_PADCONF(AM335X_PIN_SPI0_CS0, PIN_INPUT_PULLUP, MUX_MODE2)	/* spi0_cs0.i2c1_scl */
++		>;
++	};
++
+ 	i2c2_pins: i2c2-pins {
+ 		pinctrl-single,pins = <
+ 			AM33XX_PADCONF(AM335X_PIN_UART1_CTSN, PIN_INPUT_PULLUP, MUX_MODE3)	/* uart1_ctsn.i2c2_sda */
+diff --git a/arch/arm/boot/dts/ti/omap/am335x-boneblack-common.dtsi b/arch/arm/boot/dts/ti/omap/am335x-boneblack-common.dtsi
+index a7a8c61ef9b2..02ca3f7ee87d 100644
+--- a/arch/arm/boot/dts/ti/omap/am335x-boneblack-common.dtsi
++++ b/arch/arm/boot/dts/ti/omap/am335x-boneblack-common.dtsi
+@@ -28,3 +28,16 @@ memory@80000000 {
+ 		reg = <0x80000000 0x20000000>; /* 512 MB */
+ 	};
+ };
++
++&i2c1 {
++	status = "okay";
++	clock-frequency = <100000>;
++
++	pinctrl-0 = <&i2c1_pins>;
++	pinctrl-names = "default";
++
++	nunchuk: nunchuk@52 {
++		compatible = "nintendo,wiimote-extension";
++		reg = <0x52>;
++	 };
++};
+-- 
+2.45.1
+
