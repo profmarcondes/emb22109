@@ -1,0 +1,43 @@
+#!/bin/sh
+# set -e
+
+if [ "$1" == "start" ]; then
+        GADGET_DIR=/config/usb_gadget/g1
+        OLDPWD=$(pwd)
+
+        printf "Starting USB gadget: "
+
+        modprobe cppi41
+        modprobe musb-dsps
+        modprobe phy-am335x
+        modprobe libcomposite
+
+        mkdir /config
+        mount -t configfs none /config
+        mkdir ${GADGET_DIR}
+        cd ${GADGET_DIR}
+
+        echo "0x1d6b" > idVendor
+        echo "0x0104" > idProduct
+
+        mkdir strings/0x409
+        echo "lxe2210920231" > strings/0x409/serialnumber
+        echo "IFSC" > strings/0x409/manufacturer
+        echo "LXE22109 Ethernet/RNDIS gadget" > strings/0x409/product
+        
+        mkdir functions/rndis.usb0
+
+        mkdir configs/c.1
+        mkdir configs/c.1/strings/0x409
+        echo Conf 1 > configs/c.1/strings/0x409/configuration
+        echo 120 > configs/c.1/MaxPower
+        echo "f8:dc:7a:00:00:01" > functions/rndis.usb0/host_addr
+
+        ln -s functions/rndis.usb0 configs/c.1
+
+        echo musb-hdrc.0 > UDC
+
+        cd ${OLDPWD}
+
+        echo "OK"
+fi  

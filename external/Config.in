@@ -1,1 +1,3 @@
 # Place holder for load packages Config.in
+
+source "$BR2_EXTERNAL_EMB22109_PATH/package/ninvaders/Config.in"
