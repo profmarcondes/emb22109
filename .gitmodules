@@ -1,3 +1,6 @@
 [submodule "buildroot"]
 	path = buildroot
 	url = https://gitlab.com/buildroot.org/buildroot.git
+[submodule "toolbox"]
+	path = toolbox
+	url = https://github.com/profmarcondes/toolbox.git
