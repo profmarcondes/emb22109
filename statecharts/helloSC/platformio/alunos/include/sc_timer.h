@@ -4,7 +4,7 @@
 #define SC_TIMER_H_
 
 #include "sc_types.h"
-//#include <cstddef>
+// #include <cstddef>
 
 namespace sc {
 namespace timer {

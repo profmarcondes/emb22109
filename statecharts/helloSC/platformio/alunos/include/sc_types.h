@@ -7,7 +7,7 @@
 // #include <cstdint>
 #include <stdint.h>
 
-//#include <string>
+// #include <string> # Hugo
 
 namespace sc {
 		

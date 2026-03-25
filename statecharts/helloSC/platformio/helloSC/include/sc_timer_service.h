@@ -2,6 +2,7 @@
 #ifndef SC_TIMER_SERVICE_H_
 #define SC_TIMER_SERVICE_H_
 
+//#include <cstddef>
 #include <stddef.h>
 #include "sc_timer.h"
 #include "sc_types.h"

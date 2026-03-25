@@ -1,17 +1,17 @@
 #include <Arduino.h>
-#include "TrafficLightCtrl.h"
+#include "HelloSC.h"
 #include "sc_timer_service.h"
 #include "arduinoPins.h"
-#include "TrafficLightOCBs.h"
+#include "HelloSCOCB.h"
 
 using namespace sc::timer;
 
 #define MAX_TIMERS 10
 TimerTask tasks[MAX_TIMERS];
 
-TrafficLightCtrl* arduino = new TrafficLightCtrl();
+HelloSC* arduino = new HelloSC();
 TimerService* timer_sct = new TimerService(tasks, MAX_TIMERS);
-TrafficLightOCBs* operationCallback = new TrafficLightOCBs(arduino);
+HelloSCOCB* operationCallback = new HelloSCOCB(arduino);
 
 int onOffState = 0;
 int lastOnOffState = HIGH;
@@ -28,7 +28,7 @@ unsigned long debounceDelay = 50;    // the debounce time; increase if the outpu
 void setup()
 {
 	Serial.begin(9600);
-	Serial.println("Traffic Light Controller");
+	Serial.println("HelloSC example");
 	pinMode(button_1_pin, INPUT_PULLUP);
 	pinMode(button_2_pin, INPUT_PULLUP);
 
@@ -46,6 +46,7 @@ void setup()
 	arduino->setTimerService(timer_sct);
 	arduino->setOperationCallback(operationCallback);
 	arduino->enter();
+	arduino->timer().raiseToggle();
 }
 
 #define CYCLE_PERIOD (10)
@@ -66,7 +67,7 @@ void loop() {
 			pedRequestState = reading_1;
 			if (pedRequestState == LOW) {
 			  Serial.println("Button pressed");
-			  arduino->raisePedestrianRequest();
+			  arduino->uI().raiseBtn1();
 			}
 		}
 	}
@@ -81,7 +82,7 @@ void loop() {
 			onOffState = reading_1;
 			if (onOffState == LOW) {
 			  Serial.println("Button pressed");
-			  arduino->raiseOnOff();
+			  arduino->uI().raiseBtn2();
 			}
 		}
 	}
@@ -94,4 +95,6 @@ void loop() {
 		last_cycle_time = current_millies;
 		cycle_count++;
 	}
+
+
 }

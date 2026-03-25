@@ -1,17 +1,19 @@
 #include <Arduino.h>
-#include "Semaforo.h"
-#include "sc_timer_service.h"
 #include "arduinoPins.h"
-#include "SemaforoOCBs.h"
+#include "sc_timer_service.h"
+
+// TODO: Include the header files for the state machine
+// and the operation callback class.
 
 using namespace sc::timer;
 
 #define MAX_TIMERS 10
 TimerTask tasks[MAX_TIMERS];
-
-Semaforo* arduino = new Semaforo();
 TimerService* timer_sct = new TimerService(tasks, MAX_TIMERS);
-SemaforoOCBs* operationCallback = new SemaforoOCBs(arduino);
+
+// TODO: Create an instance of the state machine and the operation callback class. 
+// The state machine instance must be globally accessible for 
+// the operation callback class.
 
 int onOffState = 0;
 int lastOnOffState = HIGH;
@@ -25,15 +27,13 @@ unsigned long debounceDelay = 50;    // the debounce time; increase if the outpu
 
 
 //The setup function is called once at startup of the sketch
-void setup()
-{
+void setup() {
+
 	Serial.begin(9600);
-	Serial.println("Traffic Light Controller");
+	Serial.println("Code generation example");
+
 	pinMode(button_1_pin, INPUT_PULLUP);
 	pinMode(button_2_pin, INPUT_PULLUP);
-
-	//pushButton_1 = new PushButton(button_1_pin, button_1_changed);
-	//pushButton_2 = new PushButton(button_2_pin, button_2_changed);
 
 	pinMode(led_green_pin, OUTPUT);
 	pinMode(led_yellow_pin, OUTPUT);
@@ -43,9 +43,9 @@ void setup()
 	pinMode(ped_led_green_pin, OUTPUT);
 	pinMode(ped_led_request_pin, OUTPUT);
 
-	arduino->setTimerService(timer_sct);
-	arduino->setOperationCallback(operationCallback);
-	arduino->enter();
+	// TODO: Set the timer service for the state machine and the 
+	// operation callback for the state machine, then enter the state machine.
+	
 }
 
 #define CYCLE_PERIOD (10)
@@ -65,8 +65,10 @@ void loop() {
 		if (reading_1 != pedRequestState) {
 			pedRequestState = reading_1;
 			if (pedRequestState == LOW) {
-			  Serial.println("Button pressed");
-			  arduino->raisePedButton();
+			  Serial.println("Button 01 pressed");
+
+			  // TODO: Raise the event for the pedestrian request
+
 			}
 		}
 	}
@@ -80,20 +82,23 @@ void loop() {
 		if (reading_1 != onOffState) {
 			onOffState = reading_1;
 			if (onOffState == LOW) {
-			  Serial.println("Button pressed");
-			  arduino->raiseOnOffButton();
+			  Serial.println("Button 02 pressed");
+
+			  // TODO:Raise the event for the on/off button
+
 			}
 		}
 	}
 
 	if ( cycle_count == 0L || (current_millies >= last_cycle_time + CYCLE_PERIOD) ) {
 
-		timer_sct->proceed(current_millies - last_cycle_time);
-		arduino->runCycle();
+		// TODO: Call the timer service to proceed with the elapsed time since 
+		// the last cycle and then call the runCycle method of the state machine.
 
+
+		
 		last_cycle_time = current_millies;
 		cycle_count++;
 	}
-
 
 }

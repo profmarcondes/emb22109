@@ -1,9 +1,9 @@
 GeneratorModel for create::cpp {
 
-	const PROJECT : string = "Semaforo"
+	const PROJECT : string = "helloSC"
 	const FOLDER : string = "src-gen"
 
-	statechart semaforo {
+	statechart HelloSC {
 
 		feature Outlet {
 			targetProject = PROJECT
