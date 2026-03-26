@@ -67,7 +67,7 @@ void loop() {
 			pedRequestState = reading_1;
 			if (pedRequestState == LOW) {
 			  Serial.println("Button pressed");
-			  arduino->uI().raiseBtn1();
+			  arduino->raiseBtn1();
 			}
 		}
 	}
@@ -82,7 +82,7 @@ void loop() {
 			onOffState = reading_1;
 			if (onOffState == LOW) {
 			  Serial.println("Button pressed");
-			  arduino->uI().raiseBtn2();
+			  arduino->raiseBtn2();
 			}
 		}
 	}

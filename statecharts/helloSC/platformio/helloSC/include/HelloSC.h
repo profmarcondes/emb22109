@@ -14,6 +14,7 @@ class HelloSC;
 #include "sc_cyclebased.h"
 #include "sc_timer.h"
 #include <string.h>
+#include <Arduino.h>
 
 /*! \file
 Header of the state machine 'HelloSC'.
@@ -53,29 +54,21 @@ class HelloSC : public sc::timer::TimedInterface, public sc::CycleBasedInterface
 		static constexpr const sc::integer scvi_ui_sc_SET_PERIOD {2};
 		static constexpr const sc::integer scvi_ui_sc_RESET {2};
 		static constexpr const sc::integer scvi_ui_sc_CHANGE_PERIOD {2};
+		/*! Raises the in event 'btn1' of default interface scope. */
+		void raiseBtn1() noexcept;
+		/*! Raises the in event 'btn2' of default interface scope. */
+		void raiseBtn2() noexcept;
 		
 		
-		/*! Gets the value of the variable 'led' that is defined in the default interface scope. */
-		bool getLed() const noexcept;
-		/*! Sets the value of the variable 'led' that is defined in the default interface scope. */
-		void setLed(bool led) noexcept;
 		//! Inner class for default interface scope operation callbacks.
 		class OperationCallback
 		{
 			public:
 				virtual ~OperationCallback() = 0;
 				
-				virtual void synchronize() = 0;
+				virtual void menu(String value) = 0;
 				
-				virtual void setPeriod() = 0;
-				
-				virtual void reset() = 0;
-				
-				virtual void noOP() = 0;
-				
-				virtual void inc() = 0;
-				
-				virtual void dec() = 0;
+				virtual void setLed(bool value) = 0;
 				
 				
 		};
@@ -90,27 +83,22 @@ class HelloSC : public sc::timer::TimedInterface, public sc::CycleBasedInterface
 				
 				
 				
-				
 				/*! Gets the value of the variable 'period' that is defined in the interface scope 'Timer'. */
 				sc::integer getPeriod() const noexcept;
 				
-				/*! Sets the value of the variable 'period' that is defined in the interface scope 'Timer'. */
-				void setPeriod(sc::integer period) noexcept;
-				
-				/*! Raises the in event 'timeout' of interface scope 'Timer'. */
-				void raiseTimeout() noexcept;
 				/*! Raises the in event 'toggle' of interface scope 'Timer'. */
 				void raiseToggle() noexcept;
 				
 				
 				
 			private:
+				/*! Sets the value of the variable 'period' that is defined in the interface scope 'Timer'. */
+				void setPeriod(sc::integer period) noexcept;
+				
 				friend class HelloSC;
 				
 				sc::integer period {500};
 				
-				/*! Indicates event 'timeout' of interface scope 'Timer' is active. */
-				bool timeout_raised {false};
 				/*! Indicates event 'toggle' of interface scope 'Timer' is active. */
 				bool toggle_raised {false};
 				
@@ -124,56 +112,6 @@ class HelloSC : public sc::timer::TimedInterface, public sc::CycleBasedInterface
 		
 		/*! Returns an instance of the interface class 'Timer'. */
 		Timer& timer() noexcept;
-		
-		//! Inner class for UI interface scope.
-		class UI
-		{
-			public:
-				explicit UI(HelloSC* parent) noexcept;
-				
-				
-				
-				
-				
-				
-				/*! Gets the value of the variable 'STEP' that is defined in the interface scope 'UI'. */
-				static sc::integer getSTEP()  noexcept;
-				
-				/*! Gets the value of the variable 'RESET' that is defined in the interface scope 'UI'. */
-				static sc::integer getRESET()  noexcept;
-				
-				/*! Gets the value of the variable 'TOUT' that is defined in the interface scope 'UI'. */
-				static sc::integer getTOUT()  noexcept;
-				
-				/*! Raises the in event 'btn1' of interface scope 'UI'. */
-				void raiseBtn1() noexcept;
-				/*! Raises the in event 'btn2' of interface scope 'UI'. */
-				void raiseBtn2() noexcept;
-				
-				
-				
-			private:
-				friend class HelloSC;
-				
-				static constexpr const sc::integer STEP {100};
-				static constexpr const sc::integer RESET {500};
-				static constexpr const sc::integer TOUT {5};
-				
-				/*! Indicates event 'btn1' of interface scope 'UI' is active. */
-				bool btn1_raised {false};
-				/*! Indicates event 'btn2' of interface scope 'UI' is active. */
-				bool btn2_raised {false};
-				
-				HelloSC* parent;
-				
-				
-				
-				
-				
-		};
-		
-		/*! Returns an instance of the interface class 'UI'. */
-		UI& uI() noexcept;
 		
 		
 		
@@ -221,10 +159,10 @@ class HelloSC : public sc::timer::TimedInterface, public sc::CycleBasedInterface
 		bool isStateActive(State state) const noexcept;
 		
 		//! number of time events used by the state machine.
-		static const sc::integer timeEventsCount {5};
+		static const sc::integer timeEventsCount {4};
 		
 		//! number of time events that can be active at once.
-		static const sc::integer parallelTimeEventsCount {3};
+		static const sc::integer parallelTimeEventsCount {2};
 		
 		
 	protected:
@@ -237,6 +175,9 @@ class HelloSC : public sc::timer::TimedInterface, public sc::CycleBasedInterface
 		HelloSC& operator=(const HelloSC&);
 		
 		bool led {false};
+		static constexpr const sc::integer UI_STEP {100};
+		static constexpr const sc::integer UI_RESET {500};
+		static constexpr const sc::integer UI_TOUT {5};
 		
 		
 		
@@ -253,28 +194,29 @@ class HelloSC : public sc::timer::TimedInterface, public sc::CycleBasedInterface
 		
 		
 		Timer ifaceTimer {Timer{nullptr}};
-		UI ifaceUI {UI{nullptr}};
 		
 		OperationCallback* ifaceOperationCallback;
 		
 		typedef struct {
-			bool timeout_raised;
-			bool toggle_raised;
-		}HelloSCIfaceTimerEvBuf;
+			bool timerTimeout_raised;
+		}HelloSCInternalEvBuf;
 		typedef struct {
 			bool btn1_raised;
 			bool btn2_raised;
-		}HelloSCIfaceUIEvBuf;
+		}HelloSCIfaceEvBuf;
+		typedef struct {
+			bool toggle_raised;
+		}HelloSCIfaceTimerEvBuf;
 		typedef struct {
 			bool HelloSC_timer_sc_Timer_On_time_event_0_raised;
 			bool HelloSC_ui_sc_SET_PERIOD_time_event_0_raised;
 			bool HelloSC_ui_sc_RESET_time_event_0_raised;
 			bool HelloSC_ui_sc_CHANGE_PERIOD_time_event_0_raised;
-			bool HelloSC_time_event_0_raised;
 		}HelloSCTimeEventsEvBuf;
 		typedef struct {
+			HelloSCInternalEvBuf internal;
+			HelloSCIfaceEvBuf iface;
 			HelloSCIfaceTimerEvBuf ifaceTimer;
-			HelloSCIfaceUIEvBuf ifaceUI;
 			HelloSCTimeEventsEvBuf timeEvents;
 		}HelloSCEvBuf;
 		HelloSCEvBuf current {};
@@ -321,7 +263,6 @@ class HelloSC : public sc::timer::TimedInterface, public sc::CycleBasedInterface
 		void react_main_region__entry_Default();
 		void react_timer_sc__entry_Default();
 		void react_ui_sc__entry_Default();
-		sc::integer react(const sc::integer transitioned_before);
 		sc::integer main_region_On_react(const sc::integer transitioned_before);
 		sc::integer main_region_Off_react(const sc::integer transitioned_before);
 		sc::integer timer_sc_Timer_Off_react(const sc::integer transitioned_before);
@@ -332,9 +273,22 @@ class HelloSC : public sc::timer::TimedInterface, public sc::CycleBasedInterface
 		sc::integer ui_sc_CHANGE_PERIOD_react(const sc::integer transitioned_before);
 		void swapInEvents() noexcept;
 		void clearInEvents() noexcept;
+		void swapInternalEvents() noexcept;
+		void clearInternalEvents() noexcept;
 		void microStep();
 		
 		
+		/*! Sets the value of the variable 'led' that is defined in the internal scope. */
+		void setLed(bool led) noexcept;
+		
+		/*! Indicates event 'timerTimeout' of internal scope is active. */
+		bool timerTimeout_raised {false};
+		
+		/*! Indicates event 'btn1' of default interface scope is active. */
+		bool btn1_raised {false};
+		
+		/*! Indicates event 'btn2' of default interface scope is active. */
+		bool btn2_raised {false};
 		
 		
 		

@@ -12,12 +12,13 @@ Implementation of the state machine 'HelloSC'
 HelloSC::HelloSC() noexcept
 {
 	this->ifaceTimer.parent = this;
-	this->ifaceUI.parent = this;
 	for (sc::ushort state_vec_pos = 0; state_vec_pos < maxOrthogonalStates; ++state_vec_pos)
 		stateConfVector[state_vec_pos] = HelloSC::State::NO_STATE;
 	
 	clearInEvents();
+	clearInternalEvents();
 	swapInEvents();
+	swapInternalEvents();
 }
 
 HelloSC::~HelloSC()
@@ -29,11 +30,18 @@ HelloSC::Timer::Timer(HelloSC* parent_) noexcept :
 {
 }
 
-HelloSC::UI::UI(HelloSC* parent_) noexcept :
-	parent(parent_)
-{
+
+
+/*! Raises the in event 'btn1' of default interface scope. */
+void HelloSC::raiseBtn1() noexcept {
+	btn1_raised = true;
 }
 
+
+/*! Raises the in event 'btn2' of default interface scope. */
+void HelloSC::raiseBtn2() noexcept {
+	btn2_raised = true;
+}
 
 
 
@@ -138,12 +146,6 @@ bool HelloSC::isStateActive(State state) const noexcept
 	}
 }
 
-bool HelloSC::getLed() const noexcept
-{
-	return led
-	;
-}
-
 void HelloSC::setLed(bool led_) noexcept
 {
 	this->led = led_;
@@ -167,49 +169,9 @@ void HelloSC::Timer::setPeriod(sc::integer period_) noexcept
 	this->period = period_;
 }
 
-/*! Raises the in event 'timeout' of interface scope 'Timer'. */
-void HelloSC::Timer::raiseTimeout() noexcept {
-	timeout_raised = true;
-}
-
-
 /*! Raises the in event 'toggle' of interface scope 'Timer'. */
 void HelloSC::Timer::raiseToggle() noexcept {
 	toggle_raised = true;
-}
-
-HelloSC::UI& HelloSC::uI() noexcept
-{
-	return ifaceUI;
-}
-sc::integer HelloSC::UI::getSTEP() noexcept
-{
-	return STEP
-	;
-}
-
-sc::integer HelloSC::UI::getRESET() noexcept
-{
-	return RESET
-	;
-}
-
-sc::integer HelloSC::UI::getTOUT() noexcept
-{
-	return TOUT
-	;
-}
-
-
-/*! Raises the in event 'btn1' of interface scope 'UI'. */
-void HelloSC::UI::raiseBtn1() noexcept {
-	btn1_raised = true;
-}
-
-
-/*! Raises the in event 'btn2' of interface scope 'UI'. */
-void HelloSC::UI::raiseBtn2() noexcept {
-	btn2_raised = true;
 }
 
 
@@ -219,6 +181,7 @@ void HelloSC::enact_main_region_On()
 {
 	/* Entry action for state 'On'. */
 	setLed(true);
+	ifaceOperationCallback->setLed(led);
 }
 
 /* Entry action for state 'Off'. */
@@ -226,6 +189,7 @@ void HelloSC::enact_main_region_Off()
 {
 	/* Entry action for state 'Off'. */
 	setLed(false);
+	ifaceOperationCallback->setLed(led);
 }
 
 /* Entry action for state 'Timer_On'. */
@@ -233,37 +197,38 @@ void HelloSC::enact_timer_sc_Timer_On()
 {
 	/* Entry action for state 'Timer_On'. */
 	timerService->setTimer(this, 0, ((static_cast<sc::time> (ifaceTimer.period)) * 1), false);
-	ifaceTimer.timeout_raised = true;
+	timerTimeout_raised = true;
 }
 
 /* Entry action for state 'NO_OP'. */
 void HelloSC::enact_ui_sc_NO_OP()
 {
 	/* Entry action for state 'NO_OP'. */
-	ifaceOperationCallback->noOP();
+	ifaceOperationCallback->menu("NO_OP");
 }
 
 /* Entry action for state 'SET_PERIOD'. */
 void HelloSC::enact_ui_sc_SET_PERIOD()
 {
 	/* Entry action for state 'SET_PERIOD'. */
-	timerService->setTimer(this, 1, (((static_cast<sc::time> (HelloSC::UI::TOUT)) * 1) * 1000), false);
-	ifaceOperationCallback->setPeriod();
+	timerService->setTimer(this, 1, (((static_cast<sc::time> (HelloSC::UI_TOUT)) * 1) * 1000), false);
+	ifaceOperationCallback->menu("SET_PERIOD");
 }
 
 /* Entry action for state 'RESET'. */
 void HelloSC::enact_ui_sc_RESET()
 {
 	/* Entry action for state 'RESET'. */
-	timerService->setTimer(this, 2, (((static_cast<sc::time> (HelloSC::UI::TOUT)) * 1) * 1000), false);
-	ifaceOperationCallback->reset();
+	timerService->setTimer(this, 2, (((static_cast<sc::time> (HelloSC::UI_TOUT)) * 1) * 1000), false);
+	ifaceOperationCallback->menu("RESET");
 }
 
 /* Entry action for state 'CHANGE_PERIOD'. */
 void HelloSC::enact_ui_sc_CHANGE_PERIOD()
 {
 	/* Entry action for state 'CHANGE_PERIOD'. */
-	timerService->setTimer(this, 3, (((static_cast<sc::time> (HelloSC::UI::TOUT)) * 1) * 1000), false);
+	timerService->setTimer(this, 3, (((static_cast<sc::time> (HelloSC::UI_TOUT)) * 1) * 1000), false);
+	ifaceOperationCallback->menu("CHANGE_PERIOD");
 }
 
 /* Exit action for state 'Timer_On'. */
@@ -554,21 +519,12 @@ void HelloSC::react_ui_sc__entry_Default()
 	enseq_ui_sc_NO_OP_default();
 }
 
-sc::integer HelloSC::react(const sc::integer transitioned_before) {
-	/* State machine reactions. */
-	if (current.timeEvents.HelloSC_time_event_0_raised)
-	{ 
-		ifaceOperationCallback->synchronize();
-	} 
-	return transitioned_before;
-}
-
 sc::integer HelloSC::main_region_On_react(const sc::integer transitioned_before) {
 	/* The reactions of state On. */
 	sc::integer transitioned_after = transitioned_before;
 	if ((transitioned_after) < (0))
 	{ 
-		if (current.ifaceTimer.timeout_raised)
+		if (current.internal.timerTimeout_raised)
 		{ 
 			exseq_main_region_On();
 			enseq_main_region_Off_default();
@@ -583,7 +539,7 @@ sc::integer HelloSC::main_region_Off_react(const sc::integer transitioned_before
 	sc::integer transitioned_after = transitioned_before;
 	if ((transitioned_after) < (0))
 	{ 
-		if (current.ifaceTimer.timeout_raised)
+		if (current.internal.timerTimeout_raised)
 		{ 
 			exseq_main_region_Off();
 			enseq_main_region_On_default();
@@ -637,11 +593,10 @@ sc::integer HelloSC::ui_sc_NO_OP_react(const sc::integer transitioned_before) {
 	sc::integer transitioned_after = transitioned_before;
 	if ((transitioned_after) < (2))
 	{ 
-		if (current.ifaceUI.btn1_raised)
+		if (current.iface.btn1_raised)
 		{ 
 			exseq_ui_sc_NO_OP();
 			enseq_ui_sc_SET_PERIOD_default();
-			react(0);
 			transitioned_after = 2;
 		} 
 	} 
@@ -649,7 +604,7 @@ sc::integer HelloSC::ui_sc_NO_OP_react(const sc::integer transitioned_before) {
 	if ((transitioned_after) == (transitioned_before))
 	{ 
 		/* then execute local reactions. */
-		transitioned_after = react(transitioned_before);
+		transitioned_after = transitioned_before;
 	} 
 	return transitioned_after;
 }
@@ -659,19 +614,17 @@ sc::integer HelloSC::ui_sc_SET_PERIOD_react(const sc::integer transitioned_befor
 	sc::integer transitioned_after = transitioned_before;
 	if ((transitioned_after) < (2))
 	{ 
-		if (current.ifaceUI.btn1_raised)
+		if (current.iface.btn1_raised)
 		{ 
 			exseq_ui_sc_SET_PERIOD();
 			enseq_ui_sc_RESET_default();
-			react(0);
 			transitioned_after = 2;
 		}  else
 		{
-			if (current.ifaceUI.btn2_raised)
+			if (current.iface.btn2_raised)
 			{ 
 				exseq_ui_sc_SET_PERIOD();
 				enseq_ui_sc_CHANGE_PERIOD_default();
-				react(0);
 				transitioned_after = 2;
 			}  else
 			{
@@ -680,7 +633,6 @@ sc::integer HelloSC::ui_sc_SET_PERIOD_react(const sc::integer transitioned_befor
 					exseq_ui_sc_SET_PERIOD();
 					current.timeEvents.HelloSC_ui_sc_SET_PERIOD_time_event_0_raised = false;
 					enseq_ui_sc_NO_OP_default();
-					react(0);
 					transitioned_after = 2;
 				} 
 			}
@@ -690,7 +642,7 @@ sc::integer HelloSC::ui_sc_SET_PERIOD_react(const sc::integer transitioned_befor
 	if ((transitioned_after) == (transitioned_before))
 	{ 
 		/* then execute local reactions. */
-		transitioned_after = react(transitioned_before);
+		transitioned_after = transitioned_before;
 	} 
 	return transitioned_after;
 }
@@ -700,20 +652,18 @@ sc::integer HelloSC::ui_sc_RESET_react(const sc::integer transitioned_before) {
 	sc::integer transitioned_after = transitioned_before;
 	if ((transitioned_after) < (2))
 	{ 
-		if (current.ifaceUI.btn1_raised)
+		if (current.iface.btn1_raised)
 		{ 
 			exseq_ui_sc_RESET();
 			enseq_ui_sc_SET_PERIOD_default();
-			react(0);
 			transitioned_after = 2;
 		}  else
 		{
-			if (current.ifaceUI.btn2_raised)
+			if (current.iface.btn2_raised)
 			{ 
 				exseq_ui_sc_RESET();
-				ifaceTimer.setPeriod(HelloSC::UI::RESET);
+				ifaceTimer.setPeriod(HelloSC::UI_RESET);
 				enseq_ui_sc_NO_OP_default();
-				react(0);
 				transitioned_after = 2;
 			}  else
 			{
@@ -722,7 +672,6 @@ sc::integer HelloSC::ui_sc_RESET_react(const sc::integer transitioned_before) {
 					exseq_ui_sc_RESET();
 					current.timeEvents.HelloSC_ui_sc_RESET_time_event_0_raised = false;
 					enseq_ui_sc_NO_OP_default();
-					react(0);
 					transitioned_after = 2;
 				} 
 			}
@@ -732,7 +681,7 @@ sc::integer HelloSC::ui_sc_RESET_react(const sc::integer transitioned_before) {
 	if ((transitioned_after) == (transitioned_before))
 	{ 
 		/* then execute local reactions. */
-		transitioned_after = react(transitioned_before);
+		transitioned_after = transitioned_before;
 	} 
 	return transitioned_after;
 }
@@ -742,23 +691,21 @@ sc::integer HelloSC::ui_sc_CHANGE_PERIOD_react(const sc::integer transitioned_be
 	sc::integer transitioned_after = transitioned_before;
 	if ((transitioned_after) < (2))
 	{ 
-		if (current.ifaceUI.btn1_raised)
+		if (current.iface.btn1_raised)
 		{ 
 			exseq_ui_sc_CHANGE_PERIOD();
-			ifaceTimer.setPeriod(ifaceTimer.period + (HelloSC::UI::STEP));
-			ifaceOperationCallback->inc();
+			ifaceTimer.setPeriod(ifaceTimer.period + HelloSC::UI_STEP);
+			ifaceOperationCallback->menu("PERIOD_INC");
 			enseq_ui_sc_CHANGE_PERIOD_default();
-			react(0);
 			transitioned_after = 2;
 		}  else
 		{
-			if (current.ifaceUI.btn2_raised)
+			if (current.iface.btn2_raised)
 			{ 
 				exseq_ui_sc_CHANGE_PERIOD();
-				ifaceTimer.setPeriod(ifaceTimer.period - (HelloSC::UI::STEP));
-				ifaceOperationCallback->dec();
+				ifaceTimer.setPeriod(ifaceTimer.period - HelloSC::UI_STEP);
+				ifaceOperationCallback->menu("PERIOD_DEC");
 				enseq_ui_sc_CHANGE_PERIOD_default();
-				react(0);
 				transitioned_after = 2;
 			}  else
 			{
@@ -767,7 +714,6 @@ sc::integer HelloSC::ui_sc_CHANGE_PERIOD_react(const sc::integer transitioned_be
 					exseq_ui_sc_CHANGE_PERIOD();
 					current.timeEvents.HelloSC_ui_sc_CHANGE_PERIOD_time_event_0_raised = false;
 					enseq_ui_sc_SET_PERIOD_default();
-					react(0);
 					transitioned_after = 2;
 				} 
 			}
@@ -777,20 +723,18 @@ sc::integer HelloSC::ui_sc_CHANGE_PERIOD_react(const sc::integer transitioned_be
 	if ((transitioned_after) == (transitioned_before))
 	{ 
 		/* then execute local reactions. */
-		transitioned_after = react(transitioned_before);
+		transitioned_after = transitioned_before;
 	} 
 	return transitioned_after;
 }
 
 void HelloSC::swapInEvents() noexcept {
-	current.ifaceTimer.timeout_raised = ifaceTimer.timeout_raised;
-	ifaceTimer.timeout_raised = false;
+	current.iface.btn1_raised = btn1_raised;
+	btn1_raised = false;
+	current.iface.btn2_raised = btn2_raised;
+	btn2_raised = false;
 	current.ifaceTimer.toggle_raised = ifaceTimer.toggle_raised;
 	ifaceTimer.toggle_raised = false;
-	current.ifaceUI.btn1_raised = ifaceUI.btn1_raised;
-	ifaceUI.btn1_raised = false;
-	current.ifaceUI.btn2_raised = ifaceUI.btn2_raised;
-	ifaceUI.btn2_raised = false;
 	current.timeEvents.HelloSC_timer_sc_Timer_On_time_event_0_raised = timeEvents[0];
 	timeEvents[0] = false;
 	current.timeEvents.HelloSC_ui_sc_SET_PERIOD_time_event_0_raised = timeEvents[1];
@@ -799,20 +743,34 @@ void HelloSC::swapInEvents() noexcept {
 	timeEvents[2] = false;
 	current.timeEvents.HelloSC_ui_sc_CHANGE_PERIOD_time_event_0_raised = timeEvents[3];
 	timeEvents[3] = false;
-	current.timeEvents.HelloSC_time_event_0_raised = timeEvents[4];
-	timeEvents[4] = false;
 }
 
 void HelloSC::clearInEvents() noexcept {
-	ifaceTimer.timeout_raised = false;
+	btn1_raised = false;
+	btn2_raised = false;
 	ifaceTimer.toggle_raised = false;
-	ifaceUI.btn1_raised = false;
-	ifaceUI.btn2_raised = false;
 	timeEvents[0] = false;
 	timeEvents[1] = false;
 	timeEvents[2] = false;
 	timeEvents[3] = false;
-	timeEvents[4] = false;
+}
+
+void HelloSC::swapInternalEvents() noexcept {
+	/* When processing internal events all incoming events are processed and must be cleared from current buffer. */
+	current.iface.btn1_raised = false;
+	current.iface.btn2_raised = false;
+	current.ifaceTimer.toggle_raised = false;
+	current.timeEvents.HelloSC_timer_sc_Timer_On_time_event_0_raised = false;
+	current.timeEvents.HelloSC_ui_sc_SET_PERIOD_time_event_0_raised = false;
+	current.timeEvents.HelloSC_ui_sc_RESET_time_event_0_raised = false;
+	current.timeEvents.HelloSC_ui_sc_CHANGE_PERIOD_time_event_0_raised = false;
+	/* Swap all internal events. */
+	current.internal.timerTimeout_raised = timerTimeout_raised;
+	timerTimeout_raised = false;
+}
+
+void HelloSC::clearInternalEvents() noexcept {
+	timerTimeout_raised = false;
 }
 
 void HelloSC::microStep() {
@@ -892,7 +850,11 @@ void HelloSC::runCycle() {
 	} 
 	isExecuting = true;
 	swapInEvents();
-	microStep();
+	do
+	{ 
+		microStep();
+		swapInternalEvents();
+	} while (current.internal.timerTimeout_raised);
 	isExecuting = false;
 }
 
@@ -904,8 +866,6 @@ void HelloSC::enter() {
 	} 
 	isExecuting = true;
 	/* Default enter sequence for statechart HelloSC */
-	/* Entry action for statechart 'HelloSC'. */
-	timerService->setTimer(this, 4, (static_cast<sc::time> (200)), true);
 	enseq_main_region_default();
 	enseq_timer_sc_default();
 	enseq_ui_sc_default();
@@ -929,8 +889,6 @@ void HelloSC::exit() {
 	exseq_ui_sc();
 	stateConfVector[2] = HelloSC::State::NO_STATE;
 	stateConfVectorPosition = 2;
-	/* Exit action for state 'HelloSC'. */
-	timerService->unsetTimer(this, 4);
 	isExecuting = false;
 }
 
