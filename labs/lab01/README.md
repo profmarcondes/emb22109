@@ -13,9 +13,8 @@ nesta [página](wsl/README.md).
 
 ## Passos Iniciais
 
-A primeira etapa é clonar este repositório para o computador que irá utilizar
-no laboratório. Nas máquinas do DAELN, existe uma pasta que é persistente para
-o uso das nossas atividades. Esta pasta está no caminho ```/var/data/aluno/```.
+A primeira etapa é clonarmos este repositório para o computador que iremos utilizar
+no laboratório. Nas máquinas do DAELN, iremos realizar esta tarefa em uma pasta que é persistente e não se apaga quando os computadores são desligados. Esta pasta está no caminho ```/var/data/aluno/```.
 
 Para isso, abra um terminal no Linux e digite os comandos abaixo:
 
@@ -24,15 +23,14 @@ cd /var/data/aluno
 git clone --recurse-submodules https://github.com/profmarcondes/emb22109.git
 ```
 
-Este repositório, contém além dos laboratórios, outras pastas que serão
+Este repositório contém, além dos laboratórios, outras pastas que serão
 utilizadas em laboratórios futuros, além do próprio repositório do Buildroot já
-configurado para a versão que iremos utilizar durante o curso.
+configurado para a versão que iremos utilizar durante as atividades práticas.
 
-Agora iremos realizar o setup do container para desenvolvermos as atividades,
-para isso, basta executar o comando abaixo:
+Caso ainda não tenha criado o container de desenvolvimento nos computadores do laboratório, iremos criá-los com os comandos abaixo:
 
 ```
-cd /var/data/aluno/emb22109/scripts/
+cd /var/data/aluno/emb22109/toolbox/
 ./setup_container.sh
 ```
 
@@ -42,7 +40,7 @@ ficará armazenada de forma persistente no computador que estiver utilizando.
 Agora, para entrar no container, basta executar o comando:
 
 ```
-toolbox enter emb22109
+toolbox enter dev
 ```
 
 Todo o desenvolvimento dos laboratórios serão executados dentro do ambiente do
@@ -59,8 +57,8 @@ cd /emb22109/buildroot
 
 ## Configurando o Buildroot
 
-Se você olhar no diretório configs/, verá que existe um arquivo chamado
-beaglebone_defconfig, que é um arquivo de configuração Buildroot pronto para uso
+Se você olhar no diretório ```configs/```, verá que existe um arquivo chamado
+```beaglebone_defconfig```, que é um arquivo de configuração Buildroot pronto para uso
 para construir um sistema para a plataforma BeagleBone Black. No entanto, como
 queremos aprender sobre o Buildroot, iniciaremos nossa própria configuração do
 princípio!
@@ -81,13 +79,13 @@ documentação disponível em https://beagleboard.org/BLACK, a mesma utiliza o S
 da Texas Instruments AM335x, que é baseado em um ARM Cortex-A8. Desta forma,
 realize as seguintes configurações:
 
-  - Selecione ARM (little endian) como  target architecture
-  - Selecione cortex-A8 como Target Architecture Variant
+  - Selecione ```ARM (little endian)``` como  target architecture
+  - Selecione ```cortex-A8``` como Target Architecture Variant
 
 #### Toolchain
  
-  - Configure External toolchain como Toolchain type
-  - Selecione "Arm ARM 14.2.rel1" como Toolchain
+  - Configure ```External toolchain``` como Toolchain type
+  - Selecione ```"Arm ARM 14.2.rel1"``` como Toolchain
 
 #### Build options
 
@@ -98,16 +96,16 @@ ajuda para descrever mais informações sobre cada item de configuração.
  
 #### System
  
- - Configure a senha de root (Root password). Utilize a senha padrão tmp1223
+ - Configure a senha de root (Root password). Utilize a senha padrão ```tmp1223```
  
 #### Linux Kernel
- - Habilitar a opção de Linux Kernel 
- - Kernel version -> selecionar "Custom version" e configurar a versão 6.6.32
- - Configurar Defconfig name com "omap2plus"
+ - Habilitar a opção de ```Linux Kernel```
+ - Kernel version -> selecionar ```"Custom version"``` e configurar a versão ```6.6.32```
+ - Configurar Defconfig name com ```"omap2plus"```
  - Kernel binary format, utilizar zImage
- - Habilite a opção "Build a Device Tree Blob (DTB)" 
- - Configurar In-tree Device Tree Source file names com "ti/omap/am335x-boneblack"
- - Habilitar opção "Needs host OpenSSL"
+ - Habilite a opção ```"Build a Device Tree Blob (DTB)"```
+ - Configurar In-tree Device Tree Source file names com ```"ti/omap/am335x-boneblack"```
+ - Habilitar opção ```"Needs host OpenSSL"```
  
 #### Target Packages
 
@@ -122,15 +120,15 @@ Por hora não iremos modificar a opção padrão (tar the root filesystem)
   - Habilitar o U-boot
   - Confirmar o Build system como Kconfig
   - U-Boot version -> selecionar "Custom version" e configurar a versão 2025.01
-  - Configurar Board defconfig como am335x_evm
-  - Marcar "U-Boot needs OpenSSL"
-  - Marcar "U-Boot needs gnutls"
+  - Configurar Board defconfig como ```am335x_evm```
+  - Marcar ```U-Boot needs OpenSSL```
+  - Marcar ```U-Boot needs gnutls```
   - No menu "U-Boot binary format"
-    - Desmarcar "u-boot.bin"
-    - Marcar "u-boot.img"
-  - Habilitar "Install U-Boot SPL binary image" 
-  - Configurar "U-Boot SPL binary image name" com "MLO"
-  - Configurar "Custom make options" com "DEVICE_TREE=am335x-boneblack"
+    - Desmarcar ```u-boot.bin```
+    - Marcar ```u-boot.img```
+  - Habilitar ```Install U-Boot SPL binary image```
+  - Configurar "U-Boot SPL binary image name" com ```MLO```
+  - Configurar "Custom make options" com ```DEVICE_TREE=am335x-boneblack```
 
 #### Finalizando a configuração e gerando o Linux Embarcado
 
@@ -299,16 +297,11 @@ Desmonte as duas partições do cartão SD e ejete o cartão SD.
 
 ## Boot do sistema
 
-Insira o cartão SD no BeagleBone Black. Pressione o botão S2 (localizado perto
-do conector host USB) e conecte o cabo de alimentação USB enquanto segura S2.
-Pressionar S2 força o BeagleBoneBlack a inicializar a partir do cartão SD em vez
-do eMMC interno.
+Insira o cartão SD no BeagleBone Black. Abra a porta serial em um terminal, antes de energizar a placa com o cabo USB.
 
-Você deve ver o seu sistema inicializando. Certifique-se de que o U-Boot SPL e a
-versão do U-Boot e as datas de construção correspondem à data atual. Faça a
-mesma verificação para o kernel do Linux.
+Ao energizar a placa, você deve ver o seu sistema inicializando. Certifique-se de que o U-Boot SPL e a versão do U-Boot e as datas de construção correspondem à data atual. Faça a mesma verificação para o kernel do Linux.
 
-Faça login como root no BeagleBone Black e explore o sistema. Execute ps para
+Faça login como root no BeagleBone Black e explore o sistema. Execute ```ps``` para
 ver quais processos estão em execução e observe o que o Buildroot gerou em /bin,
 /lib, /usr e /etc.
 
@@ -341,4 +334,3 @@ Você vê os diferentes pacotes entre baixados, extraídos, corrigidos,
 configurados, construídos e instalado.
 
 Sinta-se à vontade para explorar o diretório output/ também.
-
